@@ -1,12 +1,14 @@
-// Harbor Lights — shot & seed handling for deterministic screenshot states.
+// Bazaar Nights — shot & seed handling for deterministic screenshot states.
 // ?shot=start  -> title screen
-// ?shot=play   -> mid-game on level 1 with a few differences already found
-// ?shot=end    -> win / level-complete screen
+// ?shot=cover  -> play, level 1, several differences found (cover shot)
+// ?shot=play   -> play, level 2 (harder), a hint in use (found-difference moment)
+// ?shot=hard   -> play, level 3 (hardest), no hint (harder level)
+// ?shot=end    -> game complete screen
 // ?seed=N      -> deterministic seed (reproducible screenshots)
 export function readShot() {
   const params = new URLSearchParams(location.search);
   return {
-    shot: params.get('shot'), // 'start' | 'play' | 'end' | null
+    shot: params.get('shot'), // 'start' | 'cover' | 'play' | 'end' | null
     seed: params.get('seed'),
   };
 }

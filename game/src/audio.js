@@ -1,4 +1,4 @@
-// Harbor Lights — synthesised audio (WebAudio). No sound files; every sound is generated here.
+// Bazaar Nights — synthesised audio (WebAudio). No sound files; every sound is generated here.
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 let ctx;

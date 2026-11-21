@@ -2,31 +2,33 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Night Market — Spot the Difference</title>
+<title>Bazaar Nights — Spot the Difference</title>
 <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
   <canvas id="game" width="1280" height="720"></canvas>
   <div id="ui">
     <div class="hud">
-      <div id="counter">Differences left: <span id="left-num">10</span></div>
+      <div id="level-badge">LEVEL 1 / 3  <span id="level-tag">easier</span></div>
+      <div id="counter">Found: <span id="found-num">0</span> / 10</div>
+      <div id="score">Score <span id="score-num">0</span>  <span id="streak" class="streak">streak x0</span></div>
       <div id="timer"><div class="bar"><div class="bar-fill" id="bar-fill"></div></div><div id="time-text">--:--</div></div>
-      <div id="hint-btn" class="badge">Hint <span id="hint-num">3</span></div>
+      <div id="hint-btn" class="badge">Hint <span id="hint-num">3</span><span id="hint-state"></span></div>
     </div>
     <div id="panel-left-label" class="panel-label">left</div>
-    <div id="panel-right-label" class="panel-label">right</div>
+    <div id="panel-right-label" class="panel-right">right</div>
     <div class="keyhint">Click a difference on either picture &bull; Arrows move crosshair &bull; Space to mark &bull; H for hint</div>
     <div id="screen-title" class="screen open">
-      <h1>Night Market</h1>
-      <p>Two stalls, ten subtle changes. Find every difference before the lanterns go out.</p>
+      <h1>Bazaar Nights</h1>
+      <p>Three market stalls, ten subtle changes each. Find every difference before the lanterns go out.</p>
       <button id="btn-start" class="pulse">Start game</button>
       <button class="secondary" id="btn-about">How to play</button>
     </div>
     <div id="screen-about" class="screen">
       <h1>How to play</h1>
-      <p>Click on a difference between the left and right pictures.</p>
-      <p>A marker appears on both pictures, the counter drops, and a chime sounds. Wrong clicks cost time.</p>
-      <p>You get 5 hints per level. Find all 10 differences before the timer reaches zero.</p>
+      <p>Click a difference between the left and right pictures.</p>
+      <p>A marker locks on both pictures, the counter rises, and a chime sounds. Wrong clicks cost time.</p>
+      <p>Each level is harder than the last. Find all 10 before the timer reaches zero.</p>
       <button class="secondary" id="btn-back">Back</button>
       <button id="btn-start2" class="pulse">Start game</button>
     </div>
@@ -36,13 +38,13 @@
       <button id="btn-next">Next level</button>
     </div>
     <div id="screen-gamecomplete" class="screen">
-      <h1>Market restored</h1>
+      <h1>Bazaar restored</h1>
       <p id="gc-text">You found every difference across all three levels.</p>
       <button id="btn-restart">Play again</button>
     </div>
     <div id="screen-gameover" class="screen">
       <h1>Time's up</h1>
-      <p id="go-text">The market faded before you found them all.</p>
+      <p id="go-text">The bazaar faded before you found them all.</p>
       <button id="btn-retry">Try again</button>
     </div>
   </div>
