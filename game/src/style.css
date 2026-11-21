@@ -1,35 +1,53 @@
-/* Harbor Lights — spot the difference. Styles for game/index.html. */
-html, body { margin: 0; height: 100%; background: #0b1220; color: #e8eef6;
+/* Spot-the-difference — clean, readable UI with a start screen you cannot miss. */
+html, body { margin: 0; height: 100%; background: #0a0f1a; color: #e8eef6;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; overflow: hidden; }
-#game { display: block; margin: 0 auto; background: #101828; cursor: crosshair; }
+#game { display: block; margin: 0 auto; background: #0b1420; cursor: crosshair; }
 #ui { position: absolute; inset: 0; pointer-events: none; }
 #ui > * { pointer-events: auto; }
+
+/* Screens: full-page overlays. Only one has .open at a time. */
 .screen { position: absolute; inset: 0; display: grid; place-items: center;
-  background: rgba(11, 18, 32, 0.72); backdrop-filter: blur(4px); visibility: hidden; opacity: 0;
-  transition: opacity .3s ease; text-align: center; }
+  background: rgba(10, 15, 26, 0.80); backdrop-filter: blur(6px);
+  visibility: hidden; opacity: 0; transition: opacity .35s ease; text-align: center; }
 .screen.open { visibility: visible; opacity: 1; }
-.screen h1 { margin: 0 0 12px; font-size: 2rem; letter-spacing: .06em; color: #ffd166; }
-.screen p { margin: 0 0 24px; color: #b9c6d6; font-size: 1rem; line-height: 1.5; max-width: 420px; }
-button { border: none; border-radius: 10px; padding: 12px 26px; font: 700 1rem/1 ui-sans-serif, system-ui;
-  color: #0b1220; background: #ffd166; cursor: pointer; box-shadow: 0 4px 0 #b98a1e; }
-button:hover { background: #ffe099; }
-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #b98a1e; }
-button.secondary { background: #2a3b56; color: #e8eef6; box-shadow: 0 4px 0 #172238; }
-button.secondary:hover { background: #3b5070; }
-.hud { position: absolute; top: 16px; left: 0; right: 0; display: flex;
-  justify-content: space-between; align-items: center; padding: 0 24px; pointer-events: none;
-  font: 700 1.1rem/1 ui-sans-serif, system-ui; color: #e8eef6; text-shadow: 0 2px 0 #000; }
+.screen h1 { margin: 0 0 14px; font-size: 2.25rem; letter-spacing: .08em; color: #ffd166; }
+.screen p { margin: 0 0 30px; color: #c9d6e4; font-size: 1.1rem; line-height: 1.6; max-width: 460px; }
+
+/* Buttons: big, satisfying, impossible to miss. */
+button { border: none; border-radius: 12px; padding: 16px 34px; font: 800 1.15rem/1 ui-sans-serif, system-ui;
+  color: #0a0f1a; background: #ffd166; cursor: pointer; box-shadow: 0 6px 0 #b98a1e; transition: transform .05s, box-shadow .05s; }
+button:hover { background: #ffe099; box-shadow: 0 8px 0 #b98a1e; transform: translateY(-2px); }
+button:active { transform: translateY(2px); box-shadow: 0 3px 0 #b98a1e; }
+button.secondary { background: #2a3b56; color: #e8eef6; box-shadow: 0 6px 0 #172238; }
+button.secondary:hover { background: #3b5070; box-shadow: 0 8px 0 #172238; }
+button.pulse { animation: pulse 2.5s infinite ease-in-out; }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 6px 0 #b98a1e; transform: scale(1); }
+  50% { box-shadow: 0 10px 0 #ffb74d; transform: scale(1.04); }
+}
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* HUD: top bar with counter, timer, hints. */
+.hud { position: absolute; top: 18px; left: 0; right: 0; display: flex;
+  justify-content: space-between; align-items: center; padding: 0 28px; pointer-events: none; }
 .hud > * { pointer-events: auto; }
-.badge { display: inline-block; border: 2px solid #ffd166; color: #ffd166; border-radius: 10px;
-  padding: 4px 12px; font-size: .95rem; margin-left: 10px; }
-.bar { position: relative; width: 260px; height: 10px; background: rgba(255,255,255,.12);
+.hud { font: 800 1.15rem/1 ui-sans-serif, system-ui; color: #e8eef6; text-shadow: 0 2px 0 #000; }
+.badge { display: inline-flex; align-items: center; gap: 8px; border: 2px solid #ffd166; color: #ffd166;
+  border-radius: 10px; padding: 6px 14px; font-size: 1rem; margin-left: 10px; background: rgba(0,0,0,.35); }
+.badge.empty { border-color: #666; color: #666; }
+
+.bar { position: relative; width: 260px; height: 12px; background: rgba(255,255,255,.10);
   border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,.2); }
 .bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg,#ffd166,#f7931e);
-  border-radius: 6px; transition: width .25s ease, background .2s ease; }
+  border-radius: 6px; transition: width .15s linear, background .15s ease; }
 .bar-warn .bar-fill { background: #e85640; }
-.panel-label { position: absolute; top: 10px; color: #8fa3c0; font-size: .85rem; letter-spacing: .08em;
-  text-transform: uppercase; pointer-events: none; }
-#panel-left-label  { left: 84px; }
-#panel-right-label { left: 704px; }
-.keyhint { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; color: #5d708a;
-  font-size: .85rem; pointer-events: none; }
+
+.panel-label { position: absolute; top: 12px; color: #8fa3c0; font-size: .9rem; letter-spacing: .1em;
+  text-transform: uppercase; pointer-events: none; font-weight: 700; }
+#panel-left-label  { left: 92px; }
+#panel-right-label { left: 712px; }
+
+.keyhint { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center;
+  color: #5d708a; font-size: .9rem; pointer-events: none; }
+
+/* Found-difference marker: drawn on canvas by scene.js. */
