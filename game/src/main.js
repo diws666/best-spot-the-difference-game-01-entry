@@ -45,7 +45,7 @@ let mode = 'title'; // title|about|playing|levelcomplete|gamecomplete|gameover
 let level = 0;
 let found = new Set();
 let timeLeft = LEVELS[0].time;
-let hints = 3;
+let hints = 5;
 let lastTime = null;
 let hintActive = null; // {index, endTime}
 let wrongFlashEnd = 0;
@@ -71,7 +71,7 @@ function startGame() {
   level = 0;
   found = new Set();
   timeLeft = LEVELS[0].time;
-  hints = 3;
+  hints = 5;
   hintActive = null;
   mode = 'playing';
   lastTime = performance.now();
@@ -117,7 +117,7 @@ function nextLevel() {
   if (level >= LEVELS.length) { mode = 'gamecomplete'; show('gamecomplete'); return; }
   found = new Set();
   timeLeft = LEVELS[level].time;
-  hints = 3;
+  hints = 5;
   hintActive = null;
   mode = 'playing';
   show(null);

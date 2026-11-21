@@ -152,8 +152,20 @@ function drawLantern(ctx, x, y, lit, size = 1) {
 }
 
 function drawCurtain(ctx, x, y, open, color) {
-  if (open) return;
   ctx.fillStyle = color;
+  if (open) {
+    // Tied-back curtain: two side strips with a centre tie-back — visible on both panels.
+    ctx.fillRect(x - 10, y - 8, 6, 16);
+    ctx.fillRect(x + 4, y - 8, 6, 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(x - 2, y - 4, 4, 8);
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x - 10, y - 8, 6, 16);
+    ctx.strokeRect(x + 4, y - 8, 6, 16);
+    return;
+  }
+  // Closed curtain.
   ctx.fillRect(x - 10, y - 8, 20, 16);
   ctx.strokeStyle = 'rgba(0,0,0,0.3)';
   ctx.lineWidth = 1;
@@ -164,9 +176,18 @@ function drawCurtain(ctx, x, y, open, color) {
 }
 
 function drawItem(ctx, x, y, kind, present) {
-  if (!present) return;
   ctx.save();
   ctx.translate(x, y);
+  if (!present) {
+    // Empty placeholder: a small shelf outline where the item should be — visible on both panels.
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-7, -7, 14, 14);
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fillRect(-7, -7, 14, 14);
+    ctx.restore();
+    return;
+  }
   if (kind === 'lantern') {
     drawLantern(ctx, 0, 0, true, 0.7);
   } else if (kind === 'paper') {
@@ -220,22 +241,14 @@ function drawMarker(ctx, x, y) {
 }
 
 // Draw one full panel: base scene + differences (or markers when found).
+// Base decorations are drawn first so difference overlays always paint on top and stay visible.
 function drawScene(ctx, w, h, level, isRight, found) {
   drawSky(ctx, w, h);
   drawHills(ctx, w, h);
   drawWater(ctx, w, h);
   drawPier(ctx, w, h);
 
-  const diffs = LEVELS[level].diffs;
-  diffs.forEach((d, i) => {
-    if (found.has(i)) {
-      drawMarker(ctx, d.x, d.y);
-    } else {
-      d.draw(ctx, d.x, d.y, isRight);
-    }
-  });
-
-  // Base decorations (identical in both panels, placed away from differences).
+  // Base decorations (identical in both panels).
   if (level === 0) {
     drawStall(ctx, 30, w, h, ROOF);
     drawStall(ctx, 290, w, h, ROOF);
@@ -264,6 +277,15 @@ function drawScene(ctx, w, h, level, isRight, found) {
     drawItem(ctx, 360, 305, 'paper', true);
     drawItem(ctx, 140, 435, 'lantern', true);
   }
+
+  const diffs = LEVELS[level].diffs;
+  diffs.forEach((d, i) => {
+    if (found.has(i)) {
+      drawMarker(ctx, d.x, d.y);
+    } else {
+      d.draw(ctx, d.x, d.y, isRight);
+    }
+  });
 }
 
 export { drawScene, drawMarker, MARKER_R, CURTAIN, CURTAIN_DARK, drawLantern, drawCurtain, drawItem };
