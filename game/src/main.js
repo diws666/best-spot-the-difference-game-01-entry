@@ -49,6 +49,7 @@ let hints = 3;
 let lastTime = null;
 let hintActive = null; // {index, endTime}
 let wrongFlashEnd = 0;
+let findFlashEnd = 0;   // brief satisfying flash when a difference is marked
 
 function levelInfo() { return LEVELS[level]; }
 
@@ -82,6 +83,7 @@ function markFound(index) {
   if (found.has(index)) return;
   found.add(index);
   audio.find();
+  findFlashEnd = Date.now() + 400;
   hud();
   const info = levelInfo();
   if (found.size >= info.diffs.length) completeLevel();
@@ -216,12 +218,17 @@ window.addEventListener('keydown', (ev) => {
 // --- drawing helpers --------------------------------------------------
 function drawHintRing(wx, wy) {
   const t = Date.now() / 1000;
-  const r = MARKER_R + 8 + 4 * Math.sin(t * 8);
+  const r = MARKER_R + 10 + 5 * Math.sin(t * 8);
   ctx.save();
   ctx.translate(wx, wy);
+  // outer glow
+  ctx.fillStyle = 'rgba(58,169,255,0.18)';
+  ctx.beginPath();
+  ctx.arc(0, 0, r + 6, 0, Math.PI * 2);
+  ctx.fill();
   ctx.strokeStyle = '#3aa9ff';
-  ctx.lineWidth = 3;
-  ctx.globalAlpha = 0.85;
+  ctx.lineWidth = 4;
+  ctx.globalAlpha = 0.95;
   ctx.beginPath();
   ctx.arc(0, 0, r, 0, Math.PI * 2);
   ctx.stroke();
@@ -290,6 +297,12 @@ function loop(now) {
     if (Date.now() < wrongFlashEnd) {
       const a = 0.35 * ((wrongFlashEnd - Date.now()) / 350);
       ctx.fillStyle = `rgba(224, 86, 64, ${a})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    // Satisfying find feedback: a brief gold flash over the whole frame.
+    if (Date.now() < findFlashEnd) {
+      const a = 0.25 * ((findFlashEnd - Date.now()) / 400);
+      ctx.fillStyle = `rgba(255, 209, 102, ${a})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
     if (hintActive && Date.now() < hintActive.endTime && !found.has(hintActive.index)) {
