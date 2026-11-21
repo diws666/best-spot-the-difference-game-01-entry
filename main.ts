@@ -1,41 +1,78 @@
-// A working best-game-01 entry (Node 22, standard library only): the game is this directory's
-// game/ folder, plain static files a desktop browser loads offline (game/index.html and its ES
-// modules, no library and no network request), and the program hands it in. It copies game/ and
-// screenshots/ from beside this file to /output and writes /output/dossier.json, the summary the
-// judge reads, with the vendored make.fun library. A starting point, not a winner: Block Dodger, a
-// plain 2D canvas game where a paddle dodges falling blocks and catches coins, with a title screen,
-// score, lives and levels, game over and restart, flat colours and no sound. Build your own game
-// (any genre, any library you vendor under game/, or none), put your 3 or 4 PNG or JPEG screenshots
-// in screenshots/ (the first by name is the cover) and run it.
-//
-// Serve it locally with `node serve.ts`, then open http://localhost:8080.
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// Harbor Lights spot-the-difference entrypoint, written in my own words.
+// Hands the game in: copies game/ and screenshots/ from the directory this
+// file lives in into the output directory (MAKEFUN_OUTPUT_DIR, default
+// /output) and writes dossier.json there, the summary the judge reads.
+// Node 22, standard library only.
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildDossier } from './vendor/makefun-game.ts';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
-const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const schema = 'makefun/dossier/v1';
 
-mkdirSync(out, { recursive: true });
-cpSync(join(here, 'game'), join(out, 'game'), { recursive: true });
-mkdirSync(join(out, 'screenshots'), { recursive: true });
-if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
+const log = (path) => process.stdout.write(`wrote ${path}\n`);
 
-// The scorer's own caps (reference/gate.json): only text_max_bytes shapes the bytes; the others refuse an entry the
-// scorer would refuse (more than 4 screenshots or one over 256 KiB; more than 993 files in game/ or 48 MiB of game
-// files, in all, or a path under game/ over 1000 bytes: game/ counts beside /output's own 1000-entry cap, its
-// screenshots/ and dossier.json).
-writeFileSync(
-  join(out, 'dossier.json'),
-  buildDossier(out, {
-    text_max_bytes: 163840,
-    screenshots: { max: 4, max_bytes: 262144 },
-    game_max_files: 993,
-    game_max_bytes: 50331648,
-    game_path_max_bytes: 1000,
-  }),
-);
+/** Copy every file of one source directory, file by file, logging each write. */
+const copyTree = (from, to) => {
+  mkdirSync(to, { recursive: true });
+  for (const entry of readdirSync(from, { withFileTypes: true })) {
+    const fromPath = join(from, entry.name);
+    const toPath = join(to, entry.name);
+    if (entry.isDirectory()) {
+      copyTree(fromPath, toPath);
+    } else {
+      cpSync(fromPath, toPath);
+      log(toPath);
+    }
+  }
+};
+
+mkdirSync(outDir, { recursive: true });
+
+copyTree(join(here, 'game'), join(outDir, 'game'));
+copyTree(join(here, 'screenshots'), join(outDir, 'screenshots'));
+
+/** One screenshot's dossier entry: name, media type, size, sha256. */
+const imageEntry = (name) => {
+  const path = join(outDir, 'screenshots', name);
+  const bytes = readFileSync(path);
+  const media_type =
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47
+      ? 'image/png'
+      : bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+        ? 'image/jpeg'
+        : 'application/octet-stream';
+  return {
+    name,
+    media_type,
+    bytes: bytes.length,
+    sha256: createHash('sha256').update(bytes).digest('hex'),
+  };
+};
+
+const shotsDir = join(outDir, 'screenshots');
+const images = readdirSync(shotsDir)
+  .filter((name) => !name.startsWith('.'))
+  .map((name) => ({ name, stat: statSync(join(shotsDir, name)) }))
+  .filter(({ stat }) => stat.isFile())
+  .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+  .map(({ name }) => imageEntry(name));
+
+if (images.length === 0) throw new Error('screenshots/ holds no image: the first image is the cover');
+
+const cover = images[0].name;
+
+const text =
+  'Harbor Lights is a spot-the-difference game. ' +
+  'Three levels, ten differences hidden on each level. ' +
+  'A countdown timer limits each level, a handful of hints reveal a difference, ' +
+  'and markers show the differences you have already found. ' +
+  'The screenshots show the start screen, a level in play, and the end screen.';
+
+const dossier = { schema, cover, images, text };
+
+writeFileSync(join(outDir, 'dossier.json'), JSON.stringify(dossier, null, 2) + '\n');
+log(join(outDir, 'dossier.json'));
